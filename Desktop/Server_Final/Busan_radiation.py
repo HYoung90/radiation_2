@@ -24,17 +24,17 @@ logging.basicConfig(
 )
 
 # 텔레그램 설정
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_BUSAN_RADIATION_TOKEN")
+TELEGRAM_TOKEN   = os.getenv("TELEGRAM_BUSAN_RADIATION_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 # 공공 API URL과 서비스 키
-base_url = "http://apis.data.go.kr/6260000/EnvironmentalRadiationInfoService"
-service_key = "h%2BQvAtTFBPlY19lErWf4T9JQoowL2d918ciMd6%2B%2FdBFGTV55ykPjAp8V1UWAZPRJHKWawuQOncBubNafaOVwTQ%3D%3D"
+base_url    = "http://apis.data.go.kr/6260000/EnvironmentalRadiationInfoService"
+service_key = os.getenv("Service_key")  # env에 설정한 이름을 그대로 사용
 
 # MongoDB 연결 설정
 client = MongoClient("mongodb://localhost:27017/")
 db = client['Data']
-radiation_collection = db['Busan_radiation']
+radiation_collection        = db['Busan_radiation']
 radiation_backup_collection = db['Busan_radiation_backup']
 
 def log_program_exit():
@@ -62,32 +62,36 @@ def backup_existing_data():
 def fetch_radiation_data():
     """부산 환경방사선 선량률 정보 조회"""
     try:
-        url = f"{base_url}/getEnvironmentalRadiationInfoDetail?serviceKey={service_key}&resultType=json&numOfRows=100"
+        url = (
+            f"{base_url}/getEnvironmentalRadiationInfoDetail"
+            f"?serviceKey={service_key}"
+            "&resultType=json&numOfRows=100"
+        )
         response = requests.get(url)
 
         if response.status_code == 200:
             print("방사선 선량률 정보 조회 성공.")
             logging.info("방사선 선량률 정보 조회 성공.")
 
-            data = response.json()
+            data  = response.json()
             items = data.get("response", {}).get("body", {}).get("items", {}).get("item", [])
 
             backup_existing_data()
 
             for item in items:
                 try:
-                    dose_raw = float(item.get("data", 0))
+                    dose_raw     = float(item.get("data", 0))
                     dose_rounded = round(dose_raw, 2)
                 except (TypeError, ValueError):
                     dose_rounded = None
 
                 radiation_data = {
-                    "checkTime": item.get("checkTime"),
-                    "locNm": item.get("locNm"),
-                    "data": dose_rounded,
+                    "checkTime":   item.get("checkTime"),
+                    "locNm":       item.get("locNm"),
+                    "data":        dose_rounded,
                     "aveRainData": item.get("aveRainData", "0.0"),
-                    "lat": item.get("lat", None),
-                    "lng": item.get("lng", None),
+                    "lat":         item.get("lat"),
+                    "lng":         item.get("lng"),
                 }
 
                 print(f"지역명: {radiation_data['locNm']}, 방사선량: {dose_rounded:.2f} μSv/h")
@@ -95,7 +99,7 @@ def fetch_radiation_data():
 
                 radiation_collection.update_one(
                     {"checkTime": radiation_data["checkTime"], "locNm": radiation_data["locNm"]},
-                    {"$set": radiation_data},
+                    {"$set":       radiation_data},
                     upsert=True
                 )
         else:
