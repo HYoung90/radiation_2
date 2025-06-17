@@ -13,7 +13,7 @@ from pymongo import MongoClient, DESCENDING
 from telegram_notifier import send_telegram_message  # 텔레그램 알림 통합
 
 # 환경 변수 로드
-load_dotenv()
+load_dotenv("C:/Users/user/Desktop/Server_Final/telegram_config.env")  # 환경 변수 파일명 명시
 
 # 로그 설정
 logging.basicConfig(
@@ -40,7 +40,7 @@ regions = ['KR', 'WS', 'YK', 'UJ', 'SU']
 # 공공 API URL (서비스 키는 동일, region을 동적으로 설정)
 weather_base_url = "http://data.khnp.co.kr/environ/service/realtime/weather"
 air_stability_base_url = "http://data.khnp.co.kr/environ/service/realtime/air"
-service_key = "h%2BQvAtTFBPlY19lErWf4T9JQoowL2d918ciMd6%2B%2FdBFGTV55ykPjAp8V1UWAZPRJHKWawuQOncBubNafaOVwTQ%3D%3D"
+service_key = os.getenv("Service_key")  # env에 설정한 이름을 그대로 사용
 
 # 대기안정도 설명 매핑
 air_stability_mapping = {

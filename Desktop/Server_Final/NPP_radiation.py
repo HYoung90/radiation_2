@@ -31,7 +31,7 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 # 공공 API URL과 서비스 키
 base_url = "http://data.khnp.co.kr/environ/service/realtime/radiorate"
-service_key = "h%2BQvAtTFBPlY19lErWf4T9JQoowL2d918ciMd6%2B%2FdBFGTV55ykPjAp8V1UWAZPRJHKWawuQOncBubNafaOVwTQ%3D%3D"
+service_key = os.getenv("Service_key")  # env에 설정한 이름을 그대로 사용
 
 # 발전소 목록
 plants = ["WS", "KR", "YK", "UJ", "SU"]
