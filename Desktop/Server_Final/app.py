@@ -1073,7 +1073,7 @@ def accident_result_page(genName):
                                error="An unexpected error occurred.")
 
 
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))  # 기본적으로 5000번 포트, 환경변수 PORT가 있으면 그 포트로 실행
-    app.run(host='0.0.0.0', port=5000, debug=True)
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 5000))   # PORT가 없으면 5000 사용
+    app.run(host="0.0.0.0", port=port)
 
