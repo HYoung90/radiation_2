@@ -1,0 +1,10 @@
+Flask>=2.2
+pymongo
+flask-login
+flask-bcrypt
+python-dotenv
+Flask-Caching
+pandas
+scipy
+matplotlib
+python-dateutil
