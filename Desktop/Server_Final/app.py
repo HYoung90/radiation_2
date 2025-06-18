@@ -45,7 +45,8 @@ cache = Cache(app, config={'CACHE_TYPE': 'null'})
 app.config['UPLOAD_FOLDER'] = 'uploads'
 
 # MongoDB 연결
-client = MongoClient("mongodb://localhost:27017/")
+mongo_uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
+client = MongoClient(mongo_uri)
 db = client['Data']
 users = db['users']
 
@@ -1076,5 +1077,6 @@ def accident_result_page(genName):
 
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    port = int(os.getenv("PORT", 5000))     # Railway가 주는 PORT 환경변수 사용
+    app.run(host="0.0.0.0", port=port)      # 0.0.0.0 바인딩 필수
+
