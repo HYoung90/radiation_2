@@ -1,12 +1,12 @@
 Flask
 pymongo
-python-dotenv
 Flask-Caching
 Flask-Login
 Flask-Bcrypt
-scipy
+python-dotenv
 pandas
 matplotlib
+scipy
 python-dateutil
 gunicorn
 geopandas
@@ -14,4 +14,4 @@ fiona
 shapely
 pyproj
 rtree
-
+folium
