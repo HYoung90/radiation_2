@@ -166,6 +166,9 @@
         <a href="/analysis1">토양 방사능 데이터</a> <!-- 순서 변경 -->
         <a href="/analysis2">대기 중 방사능 데이터</a> <!-- 순서 변경 -->
         <a href="/analysis4">수중 방사능 데이터</a> <!-- 순서 변경 -->
+        {% if current_user.is_authenticated and current_user.email == 'hyoung@dankook.ac.kr' %}
+          <a href="{{ url_for('list_pending_users') }}">회원 승인 관리</a>
+        {% endif %}
     </div>
 
     <!-- 컨텐츠 영역 -->
