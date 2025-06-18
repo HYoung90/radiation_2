@@ -28,6 +28,7 @@ import pytz
 from flask_login import LoginManager, UserMixin, login_user, user_logged_out,login_required, current_user
 from flask_bcrypt import Bcrypt
 from bson import ObjectId
+from functools import wraps
 
 app = Flask(__name__)
 
@@ -44,6 +45,17 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 # MongoDB 연결
 client = MongoClient("mongodb://localhost:27017/")
 db = client['Data']
+users = db['users']
+
+# User 클래스 정의 바로 위나 아래에 추가
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.email != 'hyoung@dankook.ac.kr':
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated
+
 
 # 컬렉션 설정
 collection = db['NPP_weather']  # NPP_weather 컬렉션 (기존 데이터)
@@ -131,6 +143,8 @@ def get_radiation_data():
     logging.info(f"최근 데이터 {len(data)}개 가져왔습니다.")
     return data
 
+
+
 # 방사선 평균값 계산 (예시)
 def get_average_radiation():
     client = get_mongo_connection()
@@ -164,6 +178,28 @@ class User(UserMixin):
 @login_manager.user_loader
 def load_user(user_id):
     return User.get_by_id(user_id)
+
+
+@app.route('/admin/users/pending')
+@login_required
+@admin_required
+def list_pending_users():
+    pendings = users.find({'status': 'pending'}, {'password': 0})
+    return render_template('admin_pending.html', users=list(pendings))
+
+@app.route('/admin/users/<user_id>/approve', methods=['POST'])
+@login_required
+@admin_required
+def approve_user(user_id):
+    users.update_one({'_id': ObjectId(user_id)}, {'$set': {'status': 'approved'}})
+    return redirect(url_for('list_pending_users'))
+
+@app.route('/admin/users/<user_id>/reject', methods=['POST'])
+@login_required
+@admin_required
+def reject_user(user_id):
+    users.update_one({'_id': ObjectId(user_id)}, {'$set': {'status': 'rejected'}})
+    return redirect(url_for('list_pending_users'))
 
 
 # ---------------------------------------------------------------------
@@ -389,16 +425,22 @@ def get_highest_radiation():
 #==============================================================================
 # 로그인 파트
 # ---------------------------------------------------------------------
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
         # 이메일 중복 체크
-        if db['users'].find_one({'email': email}):
+        if users.find_one({'email': email}):
             return render_template('signup.html', error='이미 등록된 이메일입니다.')
         hashed_pw = bcrypt.generate_password_hash(password).decode('utf-8')
-        db['users'].insert_one({'email': email, 'password': hashed_pw})
+        # 가입 시 pending 상태로 저장
+        users.insert_one({
+            'email': email,
+            'password': hashed_pw,
+            'status': 'pending'
+        })
         return redirect(url_for('login'))
     return render_template('signup.html')
 
@@ -407,8 +449,15 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        user_doc = db['users'].find_one({'email': email})
+        user_doc = users.find_one({'email': email})
         if user_doc and bcrypt.check_password_hash(user_doc['password'], password):
+            # 승인 상태 검사
+            st = user_doc.get('status', 'pending')
+            if st == 'pending':
+                return render_template('login.html', error='관리자 승인 대기 중입니다.')
+            if st == 'rejected':
+                return render_template('login.html', error='가입이 거부되었습니다. 문의해주세요.')
+            # approved 면 로그인
             user = User(user_doc)
             login_user(user)
             next_page = request.form.get('next') or url_for('map_home')
