@@ -1074,6 +1074,5 @@ def accident_result_page(genName):
 
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 5000))   # PORT가 없으면 5000 사용
+    port = int(os.getenv("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
