@@ -29,6 +29,7 @@ from flask_login import LoginManager, UserMixin, login_user, user_logged_out,log
 from flask_bcrypt import Bcrypt
 from bson import ObjectId
 from functools import wraps
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 
@@ -37,6 +38,7 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'  # 로그인 안 한 상태로 접근시 이동할 페이지
 
 app.config['SECRET_KEY'] = 'supersecretkey'  # 이미 있으면 중복 금지, 없으면 꼭 추가!
+load_dotenv("telegram_config.env")
 
 # Flask-Caching 설정 비활성화
 cache = Cache(app, config={'CACHE_TYPE': 'null'})
