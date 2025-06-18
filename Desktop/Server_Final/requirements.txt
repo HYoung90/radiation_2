@@ -9,3 +9,9 @@ pandas
 matplotlib
 python-dateutil
 gunicorn
+geopandas
+fiona
+shapely
+pyproj
+rtree
+
