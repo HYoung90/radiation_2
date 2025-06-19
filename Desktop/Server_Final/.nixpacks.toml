@@ -1,0 +1,6 @@
+# .nixpacks.toml
+[packages.system]
+dependencies = [
+  "swig",   # SWIG 인터페이스 생성 도구
+  "gcc"     # C/C++ 컴파일러 (g++)
+]
