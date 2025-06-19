@@ -27,9 +27,6 @@ webdriver-manager==4.0.2
 shapely
 fiona
 rtree
-gunicorn
-schedule==1.2.2
-scipy==1.15.3
 openpyxl==3.1.2
-selenium==4.33.0
-sentence_transformers==4.1.0
+gunicorn
+faiss-cpu==1.7.4
